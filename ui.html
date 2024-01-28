@@ -1,0 +1,438 @@
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/thomas-lowry/figma-plugin-ds/dist/figma-plugin-ds.css"
+/>
+
+<style>
+  .container {
+    padding: 0 1rem;
+  }
+
+  .row-input {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 2rem;
+  }
+
+  .input-width {
+    width: 4rem;
+  }
+
+  .section {
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+    /* background-color: orange; */
+    border-top: 1px solid var(--figma-color-border);
+  }
+
+  .section-top {
+    border-top: none;
+  }
+
+  .button-row {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--figma-color-border);
+  }
+
+  .text-button {
+    color: var(--figma-color-text-brand-tertiary);
+    cursor: pointer;
+    letter-spacing: var(--font-letter-spacing-pos-small);
+  }
+
+  /* Custom Figma style input slider */
+  input[type="range"] {
+    appearance: none;
+    cursor: pointer;
+    width: 3.5rem;
+    border-radius: 100px;
+    background-color: transparent;
+  }
+
+  /* Removes default focus */
+  input[type="range"]:focus {
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-runnable-track {
+    border-radius: 100px;
+    border: 1px solid var(--figma-color-border-disabled-strong);
+    height: 0.75rem;
+  }
+
+  input[type="range"]::-moz-range-track {
+    background: var(--figma-color-bg-secondary);
+    border-radius: 100px;
+    height: 0.75rem;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    background-color: var(--figma-color-bg-brand);
+    margin-top: -1px;
+    height: 0.75rem;
+    width: 0.75rem;
+    border-radius: 1rem;
+    border: 2px solid var(--figma-color-border-onbrand-strong);
+    box-shadow: 0px 0px 0px 1px var(--figma-color-border-disabled-strong);
+  }
+  input[type="range"]:focus::-webkit-slider-thumb {
+    outline: 0.125rem solid var(--figma-color-border-selected);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    border-radius: 1rem;
+    border: 2px solid var(--figma-color-border-onbrand-strong);
+    background-color: var(--figma-color-bg-brand);
+    height: 0.75rem;
+    width: 0.75rem;
+  }
+  input[type="range"]:focus::-moz-range-thumb {
+    outline: 0.125rem solid var(--figma-color-border-selected);
+  }
+
+  input[type="color"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    height: 2rem;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  input[type="color"]::-webkit-color-swatch {
+    border-radius: 0.125rem;
+    border: 1px solid var(--figma-color-border);
+  }
+
+  form {
+    margin: 0;
+  }
+
+  label {
+    color: var(--figma-color-text);
+  }
+
+  /* Update colors from the Lowry css */
+  .button--primary {
+    background-color: var(--figma-color-bg-brand);
+    cursor: pointer;
+  }
+
+  .button--primary:enabled:active,
+  .button--primary:enabled:focus {
+    border: 2px solid var(--figma-color-border-selected-strong);
+    background-color: var(--figma-color-bg-brand-pressed);
+  }
+
+  .input__field {
+    color: var(--figma-color-text);
+    background-color: var(--figma-color-bg);
+  }
+
+  .input__field:hover,
+  .input__field:placeholder-shown:hover {
+    color: var(--figma-color-text);
+    border: 1px solid var(--figma-color-border);
+  }
+
+  .input__field::-moz-selection {
+    color: var(--figma-color-text);
+    background-color: var(--figma-color-bg-onselected);
+  }
+
+  .input__field::selection {
+    color: var(--figma-color-text);
+    background-color: var(--figma-color-bg-onselected);
+  }
+
+  .input__field:active,
+  .input__field:focus {
+    color: var(--figma-color-text);
+    border: 1px solid var(--figma-color-border-selected);
+    outline: 1px solid var(--figma-color-border-selected);
+  }
+</style>
+
+<!-- <div style="width: 100%; height: 5em; background-color: aquamarine"></div> -->
+<form>
+  <div class="container type">
+    <div class="section section-top">
+      <div class="row-input">
+        <label for="lineNumber">No. of lines</label>
+        <input
+          type="number"
+          class="input__field input-width"
+          id="lineNumber"
+          value="24"
+          required
+          min="2"
+          max="80"
+        />
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="row-input">
+        <label for="strokeTop">Stroke width top</label>
+        <input
+          type="number"
+          class="input__field input-width"
+          id="strokeTop"
+          value="4"
+          required
+          min="0"
+          step="any"
+          pattern="[0-9]+([.,][0-9]+)?"
+        />
+      </div>
+
+      <div class="row-input">
+        <label for="strokeBottom">Stroke width bottom</label>
+        <input
+          type="number"
+          class="input__field input-width"
+          id="strokeBottom"
+          value="2"
+          required
+          min="0"
+          step="any"
+          pattern="[0-9]+([.,][0-9]+)?"
+        />
+      </div>
+
+      <div class="row-input">
+        <label for="strokeColor">Stroke color</label>
+        <input
+          type="color"
+          class="input__field input-width"
+          id="strokeColor"
+          value="#ffffff"
+          style="padding: 0"
+        />
+      </div>
+
+      <div class="row-input">
+        <label for="contrast">Stroke color contrast</label>
+        <input
+          type="range"
+          class="input-width"
+          id="contrast"
+          value="0"
+          min="0"
+          max="1"
+          required
+          step="0.1"
+        />
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="row-input">
+        <label for="peakCorner">Peak corner radius</label>
+        <input
+          type="number"
+          class="input__field input-width"
+          id="peakCorner"
+          value="0"
+          required
+          min="0"
+          step="any"
+          pattern="[0-9]+([.,][0-9]+)?"
+        />
+      </div>
+
+      <div class="row-input">
+        <label for="baseCorner">Base corner radius</label>
+        <input
+          type="number"
+          class="input__field input-width"
+          id="baseCorner"
+          value="32"
+          required
+          min="0"
+          step="any"
+          pattern="[0-9]+([.,][0-9]+)?"
+        />
+      </div>
+
+      <div class="row-input">
+        <label for="baseFade">Outset distance</label>
+        <input
+          type="number"
+          class="input__field input-width"
+          id="baseFade"
+          value="16"
+          required
+          min="0"
+          step="any"
+          pattern="[0-9]+([.,][0-9]+)?"
+        />
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="row-input">
+        <label for="patternWidth">Line length factor</label>
+        <input
+          type="number"
+          class="input__field input-width"
+          id="patternWidth"
+          value="3"
+          required
+          min="2"
+          step="any"
+          pattern="[0-9]+([.,][0-9]+)?"
+        />
+      </div>
+
+      <div class="row-input">
+        <label for="peakRatio">Peak height factor</label>
+        <input
+          type="number"
+          class="input__field input-width"
+          id="peakRatio"
+          value="1"
+          required
+          min="0.1"
+          step="any"
+          pattern="[0-9]+([.,][0-9]+)?"
+        />
+      </div>
+
+      <div class="row-input">
+        <label for="lineOffset">Offset lines</label>
+        <input
+          type="number"
+          class="input__field input-width"
+          id="lineOffset"
+          value="1"
+          required
+          min="0.1"
+          max="2"
+          step="0.1"
+          pattern="[0-9]+([.,][0-9]+)?"
+        />
+      </div>
+    </div>
+  </div>
+  <div class="button-row">
+    <button id="create" class="button button--primary">Create lines</button>
+    <div id="resetButton" class="type text-button">Reset</div>
+  </div>
+</form>
+
+<!-- <button id="cancel">Cancel</button> -->
+<script>
+  // Function to reset the values
+  function resetToDefault() {
+    document.getElementById("lineNumber").value = "24";
+    document.getElementById("strokeTop").value = "4";
+    document.getElementById("strokeBottom").value = "2";
+    document.getElementById("strokeColor").value = "#ffffff";
+    document.getElementById("contrast").value = "0";
+    document.getElementById("peakCorner").value = "0";
+    document.getElementById("baseCorner").value = "32";
+    document.getElementById("baseFade").value = "16";
+    document.getElementById("lineOffset").value = "1";
+    document.getElementById("peakRatio").value = "1";
+    document.getElementById("patternWidth").value = "3";
+
+    // Reset the slider background
+    var contrastSlider = document.getElementById("contrast");
+    contrastSlider.style.background = `linear-gradient(
+        to right,
+        var(--figma-color-bg-brand) 0%,
+        var(--figma-color-bg-brand) 0%,
+        var(--figma-color-bg-secondary) 0%,
+        var(--figma-color-bg-secondary) 100%
+    )`;
+  }
+
+  // Function to update slider
+  function updateSlider(slider) {
+    var value = slider.value;
+    var max = slider.max;
+    var min = slider.min;
+
+    // Calculate percentage of slider
+    var percentage = ((value - min) / (max - min)) * 100;
+
+    // Update gradient background
+    slider.style.background = `linear-gradient(
+    to right,
+    var(--figma-color-bg-brand) 0%,
+    var(--figma-color-bg-brand) ${percentage}%,
+    var(--figma-color-bg-secondary) ${percentage}%,
+    var(--figma-color-bg-secondary) 100%
+  )`;
+  }
+
+  /// Event listener to slider input
+  document.getElementById("contrast").addEventListener("input", function () {
+    updateSlider(this);
+  });
+
+  // Event listener to the reset button
+  document
+    .getElementById("resetButton")
+    .addEventListener("click", resetToDefault);
+
+  document.getElementById("create").onclick = (event) => {
+    const form = document.querySelector("form");
+
+    // Check if the form is valid based on HTML5 input attributes
+    if (!form.checkValidity()) {
+      // If the form is not valid, stop the postMessage
+      return;
+    }
+
+    // If the form is valid, prevent the default form submission
+    event.preventDefault(); // Prevent form submission
+
+    const lineNumber = parseInt(
+      document.getElementById("lineNumber").value,
+      10
+    );
+    const strokeTop = parseFloat(document.getElementById("strokeTop").value);
+    const strokeBottom = parseFloat(
+      document.getElementById("strokeBottom").value
+    );
+    const peakCorner = parseFloat(document.getElementById("peakCorner").value);
+    const baseCorner = parseFloat(document.getElementById("baseCorner").value);
+    const baseFade = parseFloat(document.getElementById("baseFade").value);
+    const lineOffset = parseFloat(document.getElementById("lineOffset").value);
+    const peakRatio = parseFloat(document.getElementById("peakRatio").value);
+    const contrast = parseFloat(document.getElementById("contrast").value);
+    const patternWidth = parseFloat(
+      document.getElementById("patternWidth").value
+    );
+    const strokeColor = document.getElementById("strokeColor").value;
+    parent.postMessage(
+      {
+        pluginMessage: {
+          type: "create-emboss",
+          lineNumber,
+          strokeTop,
+          strokeBottom,
+          peakCorner,
+          baseCorner,
+          baseFade,
+          lineOffset,
+          peakRatio,
+          strokeColor,
+          contrast,
+          patternWidth,
+        },
+      },
+      "*"
+    );
+  };
+</script>
