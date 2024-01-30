@@ -113,7 +113,8 @@ figma.ui.onmessage = (msg) => {
             // Start loop for each line
             for (let i = 0; i < lineNumber; i++) {
               // Duplicate shape
-              const shapeclone = shape.clone();
+              let shapeclone = shape.clone();
+              shapeclone = figma.flatten([shapeclone]);
 
               // Position shape
               shapeclone.y = shapeclone.y + shapeclone.height + 80;
