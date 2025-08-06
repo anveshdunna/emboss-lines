@@ -60,7 +60,47 @@ function rearrangeArray(arr: any[]) {
   return newarr;
 }
 
-figma.ui.onmessage = (msg) => {
+async function processVectorVertices(vectorNode: VectorNode, yOffset: number) {
+  const { vertices } = vectorNode.vectorNetwork;
+
+  // Step 1: Remove vertices with y > 0 and sort by x ascending
+  const sortedVertices = vertices
+    .filter((vertex) => vertex.y <= 0)
+    .sort((a, b) => a.x - b.x);
+
+  const updatedVertices: VectorVertex[] = [];
+
+  // Step 2: Copy vertices and insert duplicates (y - 1) between (1,2), (3,4), etc.
+  for (let i = 0; i < sortedVertices.length; i++) {
+    updatedVertices.push(sortedVertices[i]);
+
+    // After every odd index (1, 3, 5...), insert shifted duplicates of (i, i+1)
+    if (i % 2 === 1 && i + 1 < sortedVertices.length) {
+      updatedVertices.push(
+        { ...sortedVertices[i], y: sortedVertices[i].y - yOffset },
+        { ...sortedVertices[i + 1], y: sortedVertices[i + 1].y - yOffset }
+      );
+    }
+  }
+
+  // Step 3: Create sequential segments to connect all updated vertices
+  const updatedSegments: VectorSegment[] = [];
+  for (let i = 0; i < updatedVertices.length - 1; i++) {
+    updatedSegments.push({
+      start: i,
+      end: i + 1,
+    });
+  }
+
+  // Step 4: Apply new vector network
+  await vectorNode.setVectorNetworkAsync({
+    vertices: updatedVertices,
+    segments: updatedSegments,
+    regions: [],
+  });
+}
+
+figma.ui.onmessage = async (msg) => {
   // Check 'Create lines' button trigger
   if (msg.type === "create-emboss") {
     let selected = figma.currentPage.selection;
@@ -85,6 +125,7 @@ figma.ui.onmessage = (msg) => {
       if (allVectors) {
         // Start loop for every vector layer selected
         let selection: SceneNode[] = [];
+
         for (const shape of selected) {
           let nodes: SceneNode[] = [];
 
@@ -112,6 +153,8 @@ figma.ui.onmessage = (msg) => {
 
             // Start loop for each line
             for (let i = 0; i < lineNumber; i++) {
+              // Draw line
+              const line = figma.createVector();
               // Duplicate shape
               let shapeclone = shape.clone();
               shapeclone = figma.flatten([shapeclone]);
@@ -123,15 +166,14 @@ figma.ui.onmessage = (msg) => {
               removeStroke(shapeclone);
               removeFill(shapeclone);
 
-              // Draw line
-              const line = figma.createVector();
-              line.vectorNetwork = {
+              // Resize and move line
+              await line.setVectorNetworkAsync({
                 vertices: [
                   { x: 0, y: 0 },
                   { x: shapeclone.width * patternWidth, y: 0 },
                 ],
                 segments: [{ start: 0, end: 1 }],
-              };
+              });
 
               // Get line gap and peak height
               const lineGap =
@@ -139,21 +181,12 @@ figma.ui.onmessage = (msg) => {
               const peakHeight = peakRatio * lineGap;
 
               // Position line
-              line.y = shapeclone.y + lineOffset + i * lineGap;
+              line.y = shapeclone.y + 0.5 + lineOffset + i * lineGap;
               line.x = shapeclone.x - line.width / 2 + shapeclone.width / 2;
-
-              // Remove line stroke
-              removeStroke(line);
-
-              // Duplicate shape clone
-              const shapeclone2 = shapeclone.clone();
-
-              // Duplicate line
-              const lineclone = line.clone();
 
               // Subtract shape from line
               const linebase = figma.subtract(
-                [shapeclone2, line],
+                [shapeclone, line],
                 figma.currentPage
               );
 
@@ -163,67 +196,13 @@ figma.ui.onmessage = (msg) => {
               // Remove fill from subtracted line
               removeFill(linebaseflat);
 
-              // Intersect the line clone with the shape clone
-              const linepeak = figma.intersect(
-                [lineclone, shapeclone],
-                figma.currentPage
-              );
+              // Delete bottom row vertices
+              await processVectorVertices(linebaseflat, peakHeight);
+              let lineclean: VectorNode;
+              lineclean = linebaseflat;
 
-              // Check if intersection works
-              let linecombined;
-              let lineclean;
-              try {
-                // Flatten intersected line
-                const lineflat = figma.flatten([linepeak]);
-
-                // Remove fill from intersected line
-                removeFill(lineflat);
-
-                // Move intersected line
-                lineflat.y = lineflat.y - peakHeight;
-
-                // Combine two lines
-                linecombined = figma.union(
-                  [linebaseflat, lineflat],
-                  figma.currentPage
-                );
-
-                // Flatten the clean line
-                lineclean = figma.flatten([linecombined]);
-
-                // Remove fill from the clean line
-                removeFill(lineclean);
-              } catch {
-                // console.log("intersection failed");
-
-                // Assign original line to the clean line
-                lineclean = linebaseflat;
-              }
-
-              // Give line name
+              // Rename line
               lineclean.name = `Line ${i + 1}`;
-
-              // Sort vertices
-              const verticestemp = JSON.parse(
-                JSON.stringify(lineclean.vectorNetwork)
-              );
-              const sortedArray = rearrangeArray(verticestemp.vertices);
-              verticestemp.vertices = sortedArray;
-
-              // Update the segments
-              function updateSegments(n: number) {
-                var array = [];
-                for (var i = 0; i < n - 1; i++) {
-                  array.push({ start: i, end: i + 1 });
-                }
-                return array;
-              }
-
-              verticestemp.segments = updateSegments(
-                verticestemp.vertices.length
-              );
-
-              lineclean.vectorNetwork = verticestemp;
 
               // Storing some commonly used parameters
               const verticesLength = lineclean.vectorNetwork.vertices.length;
@@ -303,7 +282,7 @@ figma.ui.onmessage = (msg) => {
                   findMin(contrastGap, x) / 2;
               }
 
-              lineclean.vectorNetwork = cornerTemp;
+              await lineclean.setVectorNetworkAsync(cornerTemp);
 
               // Outset base points and increase corner radius
               const fadeTemp = JSON.parse(
@@ -335,7 +314,7 @@ figma.ui.onmessage = (msg) => {
                 fadeTemp.vertices[j - 1].y -= peakHeight / 2;
               }
 
-              lineclean.vectorNetwork = fadeTemp;
+              await lineclean.setVectorNetworkAsync(fadeTemp);
               lineclean.strokes = strokeTemp;
 
               nodes.push(lineclean);

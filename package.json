@@ -1,5 +1,5 @@
 {
-  "name": "Embosser",
+  "name": "embosser",
   "version": "1.0.0",
   "description": "Your Figma Plugin",
   "main": "code.js",
@@ -10,7 +10,11 @@
   "author": "",
   "license": "",
   "devDependencies": {
-    "@figma/plugin-typings": "^1.84.0",
-    "typescript": "*"
+    "@figma/eslint-plugin-figma-plugins": "^0.16.1",
+    "@figma/plugin-typings": "*",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.1",
+    "typescript": "^5.9.2"
   }
 }

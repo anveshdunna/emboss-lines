@@ -9,5 +9,6 @@
   "ui": "ui.html",
   "networkAccess": {
     "allowedDomains": ["https://cdn.jsdelivr.net/", "https://rsms.me"]
-  }
+  },
+  "documentAccess": "dynamic-page"
 }
